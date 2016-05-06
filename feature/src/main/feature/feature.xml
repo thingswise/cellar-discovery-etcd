@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="cellar-discovery-etcd">
+    <feature name="cellar-discovery-etcd" description="Thingswise :: Cellar :: Discovery via Etcd">
+        <feature version="[4.0.0,5.0.0)" dependency="true">cellar</feature>
+    </feature>
+</features>
