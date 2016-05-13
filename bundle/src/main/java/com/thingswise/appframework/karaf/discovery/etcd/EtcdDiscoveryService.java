@@ -108,7 +108,10 @@ public class EtcdDiscoveryService implements DiscoveryService {
 
 	@Override
 	public Set<String> discoverMembers() {
+		logger.debug("EtcdDiscovery: discoverMembers");		
 		Set<String> result = new HashSet<String>();
+		
+		logger.debug("EtcdDiscovery: making request to {}", etcdUrl);
 		EtcdKeysResponse response;
 		try {
 			response = configureRequest(client.getDir(keyDir).consistent().recursive()).send().get();
@@ -122,6 +125,8 @@ public class EtcdDiscoveryService implements DiscoveryService {
 			logger.error(String.format("Etcd request to %s timed out", etcdUrl), e);
 			return result;
 		}
+		
+		logger.debug("EtcdDiscovery: response: {}", response);
 		if (response.node != null) {
 			if (response.node.dir && response.node.nodes != null) {
 				for (EtcdNode child : response.node.nodes) {
@@ -130,7 +135,7 @@ public class EtcdDiscoveryService implements DiscoveryService {
 						if (dnsEntryStr != null) {
 							Map<String, Object> dnsEntry = 
 									getGson().fromJson(dnsEntryStr, new TypeToken<List<Map<String, Object>>>(){}.getType());
-							Object host = dnsEntry.get("Host");
+							Object host = dnsEntry.get("host");
 							if (host != null && host instanceof String) {
 								result.add((String)host);
 							}
@@ -139,6 +144,8 @@ public class EtcdDiscoveryService implements DiscoveryService {
 				}
 			}
 		}
+		
+		logger.debug("EtcdDiscovery: members: {}", result);
 		return result;
 	}
 
