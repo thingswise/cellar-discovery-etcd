@@ -9,6 +9,11 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.karaf.cellar.core.discovery.DiscoveryService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +26,54 @@ import mousio.etcd4j.responses.EtcdException;
 import mousio.etcd4j.responses.EtcdKeysResponse;
 import mousio.etcd4j.responses.EtcdKeysResponse.EtcdNode;
 
+@Component(	
+	configurationPid = { "com.thingswise.appframework.karaf.discovery.etcd" },
+	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	immediate = true)
 public class EtcdDiscoveryService implements DiscoveryService {
+	
+    private final String ETCD_URL = "etcdUrl";
+    private final String DNS_DIRECTORY = "dnsDirectory";	
 	
 	private static Logger logger = LoggerFactory.getLogger(EtcdDiscoveryService.class);	
 	
-	private final String etcdUrl;
-	private final EtcdClient client;
-	private final String keyDir;
+	private String etcdUrl;
+	private EtcdClient client;
+	private String keyDir;
+	
+	@Activate
+	public void activate(final Map<String, ?> properties) {
+		logger.info("Activating EtcdDiscoveryService...");
+		
+		update(properties);				
+	}
 
-	public EtcdDiscoveryService(String etcdUrl, String keyDir) {
+	@Deactivate
+	public void deactivate() {
+		logger.info("Deactivating EtcdDiscoveryService...");
+	}
+	
+	@Modified
+	public void modified(final Map<String, ?> properties) {
+		logger.info("Updating EtcdDiscoveryService...");
+		
+		update(properties);
+	}
+
+	public void update(Map<String, ?> properties) {
+		
+        String etcdUrl = (String) properties.get(ETCD_URL);
+        if (etcdUrl == null) {
+            etcdUrl = getEnvOrDefault("ETCD_URL", "http://172.17.42.1:4001");
+        }
+        String dnsDir = (String) properties.get(DNS_DIRECTORY);
+        if (dnsDir == null) {
+            dnsDir = getEnvOrDefault("DNS_DIRECTORY", "/skydns/local/skydns/appframework");
+        }
+		
 		this.etcdUrl = etcdUrl;
 		this.client = new EtcdClient(URI.create(etcdUrl));	
-		this.keyDir = keyDir;
+		this.keyDir = dnsDir;
 	}
 
 	@Override
@@ -100,5 +141,10 @@ public class EtcdDiscoveryService implements DiscoveryService {
 		}
 		return result;
 	}
+
+	private static String getEnvOrDefault(String var, String def) {
+        final String val = System.getenv(var);
+        return val == null ? def : val;
+    }
 
 }
