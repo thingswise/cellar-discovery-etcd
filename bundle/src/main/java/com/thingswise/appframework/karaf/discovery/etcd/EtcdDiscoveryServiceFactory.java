@@ -54,7 +54,7 @@ public class EtcdDiscoveryServiceFactory implements ManagedServiceFactory {
                 }
                 String dnsDir = (String) properties.get(DNS_DIRECTORY);
                 if (dnsDir == null) {
-                    dnsDir = getEnvOrDefault("DNS_DIRECTORY", "/skydns/local/skydns/appfwk");
+                    dnsDir = getEnvOrDefault("DNS_DIRECTORY", "/skydns/local/skydns/appframework");
                 }
 
                 EtcdDiscoveryService etcdDiscoveryService = new EtcdDiscoveryService(etcdUrl, dnsDir);
