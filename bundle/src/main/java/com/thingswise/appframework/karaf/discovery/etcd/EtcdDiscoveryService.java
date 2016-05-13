@@ -136,7 +136,7 @@ public class EtcdDiscoveryService implements DiscoveryService {
 							logger.debug("EtcdDiscovery: child.value: {}", child.value);
 							try {
 								Map<String, Object> dnsEntry = 
-										getGson().fromJson(dnsEntryStr, new TypeToken<List<Map<String, Object>>>(){}.getType());
+										getGson().fromJson(dnsEntryStr, new TypeToken<Map<String, Object>>(){}.getType());
 								Object host = dnsEntry.get("host");
 								if (host != null && host instanceof String) {
 									result.add((String)host);
