@@ -133,11 +133,16 @@ public class EtcdDiscoveryService implements DiscoveryService {
 					if (!child.dir) {
 						String dnsEntryStr = child.value;
 						if (dnsEntryStr != null) {
-							Map<String, Object> dnsEntry = 
-									getGson().fromJson(dnsEntryStr, new TypeToken<List<Map<String, Object>>>(){}.getType());
-							Object host = dnsEntry.get("host");
-							if (host != null && host instanceof String) {
-								result.add((String)host);
+							logger.debug("EtcdDiscovery: child.value: {}", child.value);
+							try {
+								Map<String, Object> dnsEntry = 
+										getGson().fromJson(dnsEntryStr, new TypeToken<List<Map<String, Object>>>(){}.getType());
+								Object host = dnsEntry.get("host");
+								if (host != null && host instanceof String) {
+									result.add((String)host);
+								}
+							} catch (Exception e) {
+								logger.error("Error processing etcd response", e);
 							}
 						}
 					}
